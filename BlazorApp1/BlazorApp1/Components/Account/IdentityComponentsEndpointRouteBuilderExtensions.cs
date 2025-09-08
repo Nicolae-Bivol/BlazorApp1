@@ -2,7 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using BlazorApp1.Components.Account.Pages;
 using BlazorApp1.Components.Account.Pages.Manage;
-using BlazorApp1.Data;
+using BlazorApp1.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
