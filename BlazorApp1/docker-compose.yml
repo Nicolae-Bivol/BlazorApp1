@@ -1,0 +1,28 @@
+﻿services:
+  blazorapp1:
+    image: ${DOCKER_REGISTRY-}blazorapp1
+    build:
+      context: .
+      dockerfile: BlazorApp1/Dockerfile
+    ports:
+      - "5000:8080"   # expune aplicația Blazor pe localhost:5000
+    depends_on:
+      - sqlserver     # Blazor așteaptă să pornească SQL Server
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    networks:
+      - blazornet
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "Str0ng_Passw0rd!"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"   # SQL Server pe localhost:1433
+    networks:
+      - blazornet
+
+networks:
+  blazornet:
