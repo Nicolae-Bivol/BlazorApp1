@@ -11,6 +11,12 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.Infrastructure", "..\BlazorApp1.Infrastructure\BlazorApp1.Infrastructure.csproj", "{EE5E9F8F-C601-4B75-829C-BF429CC75803}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.Domain", "..\BlazorApp1.Domain\BlazorApp1.Domain.csproj", "{6D376A89-7AB8-48AC-AF12-22E1B44457C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.Shared", "..\BlazorApp1.Shared\BlazorApp1.Shared.csproj", "{D123A749-46A7-4960-A8A2-80293053818E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorApp1.Application", "..\BlazorApp1.Application\BlazorApp1.Application.csproj", "{0CC051BF-77A4-44B8-9EE9-BD2E62E392D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +39,18 @@ Global
 		{EE5E9F8F-C601-4B75-829C-BF429CC75803}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE5E9F8F-C601-4B75-829C-BF429CC75803}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE5E9F8F-C601-4B75-829C-BF429CC75803}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D376A89-7AB8-48AC-AF12-22E1B44457C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D376A89-7AB8-48AC-AF12-22E1B44457C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D376A89-7AB8-48AC-AF12-22E1B44457C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D376A89-7AB8-48AC-AF12-22E1B44457C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D123A749-46A7-4960-A8A2-80293053818E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D123A749-46A7-4960-A8A2-80293053818E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D123A749-46A7-4960-A8A2-80293053818E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D123A749-46A7-4960-A8A2-80293053818E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CC051BF-77A4-44B8-9EE9-BD2E62E392D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CC051BF-77A4-44B8-9EE9-BD2E62E392D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CC051BF-77A4-44B8-9EE9-BD2E62E392D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CC051BF-77A4-44B8-9EE9-BD2E62E392D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

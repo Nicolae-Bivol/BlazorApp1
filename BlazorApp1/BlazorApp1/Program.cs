@@ -7,35 +7,47 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Razor Components + interactivitate WASM
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
+// Auth helper services
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 
+// API controllers
+builder.Services.AddControllers();
+
+// CORS – permisiv în dev
+builder.Services.AddCors(o =>
+{
+     o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
+
+// HttpClient (server-side)
+builder.Services.AddHttpClient();
+
+// Identity (dacă folosești)
 builder.Services.AddAuthentication(options =>
 {
      options.DefaultScheme = IdentityConstants.ApplicationScheme;
      options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 })
-    .AddIdentityCookies();
+.AddIdentityCookies();
+
 builder.Services.AddAuthorization();
 
-// 🔹 Connection string din appsettings.json
+// DbContext + connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 🔹 Înregistrăm DbContextFactory în loc de DbContext
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString)
-           .EnableSensitiveDataLogging(builder.Environment.IsDevelopment()));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// 🔹 Identity folosește DbContext prin factory
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
@@ -45,7 +57,7 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline
 if (app.Environment.IsDevelopment())
 {
      app.UseWebAssemblyDebugging();
@@ -54,20 +66,27 @@ if (app.Environment.IsDevelopment())
 else
 {
      app.UseExceptionHandler("/Error", createScopeForErrors: true);
-     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
      app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
+// CORS
+app.UseCors();
+
+// Antiforgery (API-ul nostru îl ignoră explicit)
 app.UseAntiforgery();
 
+// API
+app.MapControllers();
+
+// UI Blazor
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorApp1.Client._Imports).Assembly);
 
-// Add additional endpoints required by the Identity /Account Razor components.
+// Endpoint-uri suplimentare Identity
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();

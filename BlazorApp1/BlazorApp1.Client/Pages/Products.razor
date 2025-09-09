@@ -1,0 +1,158 @@
+﻿@page "/products"
+@rendermode InteractiveWebAssembly
+@using System.Net.Http.Json
+@using BlazorApp1.Shared.DTOs
+@inject HttpClient Http
+
+<h3>Products</h3>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+@if (!string.IsNullOrWhiteSpace(info))
+{
+    <div class="alert alert-success">@info</div>
+}
+
+@if (products is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (products.Count == 0)
+{
+    <p><em>No products found.</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width:18rem;">Name</th>
+                <th>Description</th>
+                <th style="width:8rem;">Price</th>
+                <th style="width:6rem;">Stock</th>
+                <th style="width:10rem;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.Description</td>
+                    <td>@p.Price</td>
+                    <td>@p.Stock</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary me-1" @onclick="() => Edit(p)">Edit</button>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => Delete(p.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<hr />
+
+<h4>@(editProduct.Id == 0 ? "Add new product" : "Edit product")</h4>
+
+<div class="mb-2">
+    <input @bind="editProduct.Name" placeholder="Name" class="form-control" />
+</div>
+<div class="mb-2">
+    <input @bind="editProduct.Description" placeholder="Description" class="form-control" />
+</div>
+<div class="mb-2">
+    <input @bind="editProduct.Price"
+           type="number"
+           step="0.01"
+           inputmode="decimal"
+           lang="en-US"
+           placeholder="Price (ex: 0.05 sau 0,05)"
+           class="form-control" />
+</div>
+<div class="mb-2">
+    <input @bind="editProduct.Stock" type="number" placeholder="Stock" class="form-control" />
+</div>
+<div class="d-flex gap-2">
+    <button type="button" class="btn btn-success" @onclick="Save" disabled="@isBusy">
+        @(isBusy ? "Saving..." : "Save")
+    </button>
+    @if (editProduct.Id != 0)
+    {
+        <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@isBusy">Cancel</button>
+    }
+</div>
+
+@code {
+    private List<ProductDto>? products;
+    private ProductDto editProduct = new();
+    private string? error;
+    private string? info;
+    private bool isBusy;
+
+    protected override async Task OnInitializedAsync() => await LoadProductsAsync();
+
+    private async Task LoadProductsAsync()
+    {
+        error = info = null;
+        try { products = await Http.GetFromJsonAsync<List<ProductDto>>("api/products"); }
+        catch (Exception ex) { error = "Eroare încărcare produse: " + ex.Message; products = new(); }
+    }
+
+    void Edit(ProductDto p) =>
+        (error, info, editProduct) = (null, null, new ProductDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            Description = p.Description,
+            Price = p.Price,
+            Stock = p.Stock
+        });
+
+    void Cancel() { error = info = null; editProduct = new(); }
+
+    async Task Save()
+    {
+        error = info = null;
+
+        if (string.IsNullOrWhiteSpace(editProduct.Name)) { error = "Name este obligatoriu."; return; }
+        if (editProduct.Price < 0) { error = "Price nu poate fi negativ."; return; }
+        if (editProduct.Stock < 0) { error = "Stock nu poate fi negativ."; return; }
+
+        isBusy = true;
+        try
+        {
+            var resp = editProduct.Id == 0
+                ? await Http.PostAsJsonAsync("api/products", editProduct)
+                : await Http.PutAsJsonAsync($"api/products/{editProduct.Id}", editProduct);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                info = editProduct.Id == 0 ? "Produs creat." : "Produs actualizat.";
+                await LoadProductsAsync();
+                editProduct = new();
+            }
+            else
+            {
+                error = $"Eroare: {(int)resp.StatusCode} - {await resp.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { isBusy = false; }
+    }
+
+    async Task Delete(int id)
+    {
+        error = info = null; isBusy = true;
+        try
+        {
+            var resp = await Http.DeleteAsync($"api/products/{id}");
+            if (resp.IsSuccessStatusCode) { info = "Produs șters."; await LoadProductsAsync(); }
+            else { error = $"Eroare ștergere: {(int)resp.StatusCode} - {await resp.Content.ReadAsStringAsync()}"; }
+        }
+        catch (Exception ex) { error = ex.Message; }
+        finally { isBusy = false; }
+    }
+}
