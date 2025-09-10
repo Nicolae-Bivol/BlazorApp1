@@ -5,6 +5,11 @@ using BlazorApp1.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+// ⬇️ ADĂUGĂ
+using BlazorApp1.Services;                 // SendGridOptions, SendGridEmailSender
+using Microsoft.Extensions.Options;        // pentru IOptions<>
+// (IEmailSender<TUser> e în Microsoft.AspNetCore.Identity)
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Razor Components + interactivitate WASM
@@ -29,7 +34,7 @@ builder.Services.AddCors(o =>
 // HttpClient (server-side)
 builder.Services.AddHttpClient();
 
-// Identity (dacă folosești)
+// Identity
 builder.Services.AddAuthentication(options =>
 {
      options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -48,12 +53,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+{
+     options.SignIn.RequireConfirmedAccount = true; // confirmare email obligatorie
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddSignInManager()
+.AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+// ⬇️ ÎNLOCUIEȘTE no-op sender-ul cu SendGrid
+// builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.Configure<SendGridOptions>(builder.Configuration.GetSection("SendGrid"));
+builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
 
 var app = builder.Build();
 
